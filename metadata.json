@@ -1,0 +1,8 @@
+{
+  "name": "Local Treasures",
+  "description": "An AI-powered marketplace to discover and list local secondhand goods. This app uses Gemini to generate item descriptions from photos, and provides a multi-modal chat assistant to help you find exactly what you're looking for using web and map search.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}
