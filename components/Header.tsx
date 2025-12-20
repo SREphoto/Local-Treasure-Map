@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { AppView } from '../types';
-import { MapIcon, ListIcon, FindIcon, VideoIcon } from './Icons';
+import { MapIcon, ListIcon, FindIcon, VideoIcon, SparklesIcon } from './Icons';
 
 interface HeaderProps {
   currentView: AppView;
@@ -10,36 +9,45 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView }) => {
   const navItems = [
-    { view: AppView.Map, label: 'Map View', icon: <MapIcon /> },
-    { view: AppView.List, label: 'List an Item', icon: <ListIcon /> },
-    { view: AppView.VideoList, label: 'Video Lister', icon: <VideoIcon /> },
-    { view: AppView.Find, label: 'Find Treasures', icon: <FindIcon /> },
+    { view: AppView.Map, icon: MapIcon, label: 'Map' },
+    { view: AppView.List, icon: ListIcon, label: 'List Item' },
+    { view: AppView.VideoList, icon: VideoIcon, label: 'Video List' },
+    { view: AppView.Find, icon: FindIcon, label: 'Find Treasures' },
   ];
 
   return (
-    <header className="bg-white rounded-xl shadow-md p-4">
-      <div className="flex flex-col sm:flex-row justify-between items-center">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4 sm:mb-0">
-          Local Treasures
-        </h1>
-        <nav className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
-          {navItems.map((item) => {
-            const isActive = currentView === item.view;
-            return (
-              <button
-                key={item.view}
-                onClick={() => setCurrentView(item.view)}
-                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                  isActive
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {item.icon}
-                <span className="hidden md:inline">{item.label}</span>
-              </button>
-            );
-          })}
+    <header className="sticky top-4 z-50 mb-8">
+      <div className="glass rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 transition-all duration-300 hover:shadow-2xl hover:bg-white/80">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-primary to-accent rounded-xl shadow-lg text-white animate-pulse-slow">
+            <SparklesIcon className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-heading font-bold text-gradient tracking-tight">
+              Local Treasures
+            </h1>
+            <p className="text-xs text-muted-foreground font-medium tracking-wide uppercase">
+              AI-Powered Marketplace
+            </p>
+          </div>
+        </div>
+
+        <nav className="flex items-center gap-2 bg-secondary/50 p-1.5 rounded-xl backdrop-blur-sm">
+          {navItems.map((item) => (
+            <button
+              key={item.view}
+              onClick={() => setCurrentView(item.view)}
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                ${currentView === item.view
+                  ? 'bg-white text-primary shadow-md scale-105'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'}
+              `}
+            >
+              <item.icon />
+              <span className="hidden sm:inline">{item.label}</span>
+            </button>
+          ))}
         </nav>
       </div>
     </header>

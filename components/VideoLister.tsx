@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { generateListingsFromVideo } from '../services/geminiService';
 import { SparklesIcon, VideoIcon } from './Icons';
@@ -21,7 +20,6 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
         reader.onerror = error => reject(error);
     });
 };
-
 
 export const VideoLister: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
@@ -50,7 +48,7 @@ export const VideoLister: React.FC = () => {
             setError(null);
             setGeneratedListings([]);
             setVideoBlob(null);
-            
+
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
             streamRef.current = stream;
             if (videoRef.current) {
@@ -84,7 +82,7 @@ export const VideoLister: React.FC = () => {
             setIsRecording(false);
         }
     };
-    
+
     const handleAnalyzeVideo = async () => {
         if (!videoBlob) return;
 
@@ -95,7 +93,7 @@ export const VideoLister: React.FC = () => {
         try {
             setLoadingMessage('Extracting frames from video...');
             const frames = await extractFramesFromVideo(videoBlob, 1); // 1 frame per second
-            
+
             if (frames.length === 0) {
                 throw new Error("Could not extract any frames from the video.");
             }
@@ -105,7 +103,7 @@ export const VideoLister: React.FC = () => {
 
             setLoadingMessage('AI is identifying your items...');
             const base64Frames = await Promise.all(frames.map(blob => blobToBase64(blob)));
-            
+
             const result = await generateListingsFromVideo(base64Frames);
 
             if (result.listings && result.listings.length > 0) {
@@ -133,83 +131,136 @@ export const VideoLister: React.FC = () => {
     }
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-md animate-fade-in">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">AI Video Lister</h2>
-            
-            {error && <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">{error}</div>}
-            
+        <div className="glass rounded-3xl p-8 animate-fade-in max-w-5xl mx-auto">
+            <div className="mb-8 border-b border-border pb-6">
+                <h2 className="text-3xl font-heading font-bold text-foreground mb-2">AI Video Lister</h2>
+                <p className="text-muted-foreground">Scan multiple items at once with a simple video pan.</p>
+            </div>
+
+            {error && (
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive p-4 mb-6 rounded-xl flex items-center gap-3" role="alert">
+                    <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                    {error}
+                </div>
+            )}
+
             <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-gray-100 rounded-lg p-4 flex flex-col items-center justify-center min-h-[300px]">
-                    <video ref={videoRef} className={`w-full rounded-lg ${videoBlob && !isRecording ? '' : 'hidden'}`} controls />
-                     <div className={`w-full h-full flex items-center justify-center ${videoBlob ? 'hidden' : ''}`}>
-                        {isRecording ? <div className="text-red-500 font-bold">Recording...</div> : <VideoIcon />}
+                <div className="relative bg-black rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] group">
+                    <video
+                        ref={videoRef}
+                        className={`w-full h-full object-cover ${videoBlob && !isRecording ? '' : 'hidden'}`}
+                        controls
+                    />
+                    <div className={`absolute inset-0 flex items-center justify-center ${videoBlob ? 'hidden' : ''} bg-secondary/30`}>
+                        {isRecording ? (
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
+                                <span className="text-white font-bold tracking-wider">RECORDING</span>
+                            </div>
+                        ) : (
+                            <div className="text-muted-foreground/50 flex flex-col items-center gap-4 group-hover:scale-110 transition-transform duration-500">
+                                <VideoIcon />
+                                <span className="font-medium">Camera Preview</span>
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div className="flex flex-col justify-center space-y-4">
-                     {!videoBlob && !isRecording && (
-                        <>
-                            <p className="text-gray-600 text-center">Take a short video (under 20s) panning over the items you want to sell. Our AI will automatically create listings for you!</p>
-                            <button onClick={handleStartRecording} className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+
+                <div className="flex flex-col justify-center space-y-6">
+                    {!videoBlob && !isRecording && (
+                        <div className="space-y-6 text-center md:text-left">
+                            <div className="bg-secondary/50 p-6 rounded-2xl border border-border">
+                                <h3 className="font-bold text-foreground mb-2">How it works</h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    Take a short video (under 20s) panning over the items you want to sell.
+                                    Our AI will automatically identify each item and create listings for you!
+                                </p>
+                            </div>
+                            <button
+                                onClick={handleStartRecording}
+                                className="w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98]"
+                            >
                                 Start Recording
                             </button>
-                        </>
+                        </div>
                     )}
+
                     {isRecording && (
-                        <button onClick={handleStopRecording} className="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                        <button
+                            onClick={handleStopRecording}
+                            className="w-full bg-red-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-red-500/30 hover:scale-[1.02] active:scale-[0.98] animate-pulse"
+                        >
                             Stop Recording
                         </button>
                     )}
+
                     {videoBlob && !isLoading && generatedListings.length === 0 && (
-                         <>
-                             <p className="text-gray-600 text-center">Video ready! Let's see what you've got.</p>
-                             <button onClick={handleAnalyzeVideo} className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center">
-                                 <SparklesIcon /> Analyze Video
-                             </button>
-                             <button onClick={reset} className="w-full bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors">
+                        <div className="space-y-4 animate-slide-up">
+                            <p className="text-foreground font-medium text-center">Video captured! Ready to analyze?</p>
+                            <button
+                                onClick={handleAnalyzeVideo}
+                                className="w-full bg-gradient-to-r from-primary to-accent text-white font-bold py-4 px-6 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                            >
+                                <SparklesIcon className="w-5 h-5" />
+                                Analyze Video
+                            </button>
+                            <button
+                                onClick={reset}
+                                className="w-full bg-secondary text-foreground font-bold py-3 px-6 rounded-xl hover:bg-secondary/80 transition-colors"
+                            >
                                 Record Again
-                             </button>
-                         </>
+                            </button>
+                        </div>
                     )}
-                     {isLoading && (
-                        <div className="text-center">
-                             <div className="flex items-center justify-center space-x-2">
-                                <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
-                                <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
-                                <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse [animation-delay:0.4s]"></div>
+
+                    {isLoading && (
+                        <div className="text-center py-8 bg-secondary/30 rounded-2xl border border-border animate-pulse">
+                            <div className="flex items-center justify-center space-x-3 mb-4">
+                                <div className="w-3 h-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                <div className="w-3 h-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
                             </div>
-                            <p className="mt-4 text-gray-600">{loadingMessage}</p>
+                            <p className="text-foreground font-medium">{loadingMessage}</p>
                         </div>
                     )}
                 </div>
             </div>
 
             {generatedListings.length > 0 && (
-                 <div className="mt-8">
-                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold">Generated Listings ({generatedListings.length})</h3>
-                        <button onClick={reset} className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                <div className="mt-12 animate-slide-up">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-2xl font-bold text-foreground">Generated Listings <span className="text-muted-foreground text-lg font-normal">({generatedListings.length})</span></h3>
+                        <button onClick={reset} className="text-primary font-semibold hover:underline">
                             Start Over
                         </button>
-                     </div>
-                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                         {generatedListings.map((item, index) => (
-                             <div key={index} className="bg-gray-50 rounded-lg shadow p-4 space-y-2">
-                                 <img src={`data:image/jpeg;base64,${item.imageData}`} alt={item.title} className="w-full h-40 object-cover rounded-md" />
-                                 <h4 className="font-bold">{item.title}</h4>
-                                 <p className="text-sm text-gray-600 truncate">{item.description}</p>
-                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{item.category}</span>
-                                    <span className="text-lg font-bold text-green-700">${item.price}</span>
-                                 </div>
-                             </div>
-                         ))}
-                     </div>
-                 </div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {generatedListings.map((item, index) => (
+                            <div key={index} className="bg-white rounded-2xl shadow-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-300 group">
+                                <div className="relative h-48 overflow-hidden">
+                                    <img src={`data:image/jpeg;base64,${item.imageData}`} alt={item.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-foreground shadow-sm">
+                                        {item.category}
+                                    </div>
+                                </div>
+                                <div className="p-5 space-y-3">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <h4 className="font-bold text-lg leading-tight line-clamp-2">{item.title}</h4>
+                                        <span className="text-lg font-bold text-green-600 whitespace-nowrap">${item.price}</span>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground line-clamp-3">{item.description}</p>
+                                    <button className="w-full mt-2 py-2 bg-secondary hover:bg-secondary/80 text-foreground text-sm font-semibold rounded-lg transition-colors">
+                                        Edit Details
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             )}
         </div>
     );
 };
-
 
 // Helper function to extract frames
 async function extractFramesFromVideo(videoBlob: Blob, fps: number): Promise<Blob[]> {
@@ -229,12 +280,12 @@ async function extractFramesFromVideo(videoBlob: Blob, fps: number): Promise<Blo
 
         video.onseeked = async () => {
             if (!context) {
-                 reject(new Error("Canvas context is not available."));
-                 return;
+                reject(new Error("Canvas context is not available."));
+                return;
             }
             context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
             canvas.toBlob((blob) => {
-                if(blob) frames.push(blob);
+                if (blob) frames.push(blob);
 
                 if (video.currentTime < video.duration) {
                     video.currentTime += 1 / fps;
@@ -243,7 +294,7 @@ async function extractFramesFromVideo(videoBlob: Blob, fps: number): Promise<Blo
                 }
             }, 'image/jpeg', 0.8);
         };
-        
+
         video.onerror = () => {
             reject(new Error("Failed to load video for frame extraction."));
         }
