@@ -52,7 +52,7 @@ export const generateListingDetails = async (base64Image: string, mimeType: stri
   };
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.0-flash',
     contents: { parts: [imagePart, textPart] },
     config: {
       responseMimeType: "application/json",
@@ -102,7 +102,7 @@ export const generateListingsFromVideo = async (base64Frames: string[]) => {
   }));
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-3.0-pro',
     contents: { parts: [{ text: prompt }, ...imageParts] },
     config: {
       responseMimeType: "application/json",
@@ -138,7 +138,7 @@ export const getGeneralResponse = async (prompt: string) => {
 export const getWebSearchResponse = async (prompt: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.0-flash",
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }],
@@ -151,7 +151,7 @@ export const getWebSearchResponse = async (prompt: string) => {
 export const getLocalSearchResponse = async (prompt: string, location: Location) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.0-flash",
     contents: prompt,
     config: {
       tools: [{ googleMaps: {} }],
@@ -172,7 +172,7 @@ export const getLocalSearchResponse = async (prompt: string, location: Location)
 export const getDeepAnalysisResponse = async (prompt: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-pro",
+    model: "gemini-3.0-pro",
     contents: prompt,
     config: {
       thinkingConfig: { thinkingBudget: 32768 },
